@@ -45,11 +45,15 @@ export function loadPrerenderScripts(initialState) {
 }
 
 export function moveHelmetScripts() {
+  let resolve;
+  const promise = new Promise((res) => { resolve = res; });
   document.addEventListener('DOMContentLoaded', () => {
-    const helmetScripts = [...document.querySelectorAll('script[data-react-helmet]')];
+    const helmetScripts = [...document.body.querySelectorAll('script[data-react-helmet]')];
     helmetScripts.forEach((script) => document.body.removeChild(script));
     helmetScripts.forEach((script) => document.head.appendChild(script));
+    resolve();
   });
+  return promise;
 }
 
 export function loadServiceWorker({ dispatch, config }) {

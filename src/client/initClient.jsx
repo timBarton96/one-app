@@ -29,7 +29,7 @@ export default async function initClient() {
   try {
     // eslint-disable-next-line no-underscore-dangle
     setModuleMap(global.__CLIENT_HOLOCRON_MODULE_MAP__);
-    moveHelmetScripts();
+    const helmetScriptsMoved = moveHelmetScripts();
 
     const store = initializeClientStore();
     const history = browserHistory;
@@ -68,6 +68,9 @@ export default async function initClient() {
     /* eslint-enable react/jsx-props-no-spreading */
 
     const render = renderMode === 'render' ? ReactDOM.render : ReactDOM.hydrate;
+
+    // Don't render until react-helmet scripts have been moved to prevent race condition
+    await helmetScriptsMoved;
 
     render(
       <App />,
