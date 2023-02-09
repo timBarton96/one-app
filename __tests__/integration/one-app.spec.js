@@ -957,6 +957,15 @@ describe('Tests that require Docker setup', () => {
       });
     });
 
+    test('TESTING', async () => {
+      await browser.url(`${appAtTestUrls.browserUrl}/healthy-frank/ssr-frank`);
+
+      expect(await browser.getCookies()).toEqual([{
+        name: 'asd',
+        value: 'asd',
+      }]);
+    });
+
     describe('module root configureRequestLog', () => {
       it('has included userId from cookies in request log', async () => {
         const requestLogRegex = /some-user-id-1234/;
