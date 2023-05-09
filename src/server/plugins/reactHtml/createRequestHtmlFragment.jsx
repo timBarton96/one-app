@@ -104,13 +104,28 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
 
       const state = store.getState();
 
-      if (getRenderMethodName(state) === 'renderForStaticMarkup') {
+      const renderMethodName = getRenderMethodName(state);
+
+      // we don't need to worry about dangling references in the event of a promise rejection
+      // https://github.com/siimon/prom-client/blob/v14.2.0/lib/summary.js#L149-L159 so can
+      // avoid adding noise to the measurements by observing the timing measurement in the catch
+      const finishComposeTimer = startSummaryTimer(
+        ssrMetrics.composeModules,
+        { renderMethodName }
+      );
+
+      if (renderMethodName === 'renderForStaticMarkup') {
         await dispatch(composeModules(routeModules));
+        finishComposeTimer();
       } else {
         const { fallback, redirect } = await getModuleDataBreaker.fire({
           dispatch,
           modules: routeModules,
         });
+        // avoid adding noise when the breaker is open
+        if (!fallback) {
+          finishComposeTimer();
+        }
 
         if (redirect) {
           reply.redirect(redirect.status || 302, redirect.url);
@@ -124,14 +139,11 @@ const createRequestHtmlFragment = async (request, reply, { createRoutes }) => {
         }
       }
 
-      const renderMethod = getRenderMethodName(state) === 'renderForStaticMarkup'
+      const renderMethod = renderMethodName === 'renderForStaticMarkup'
         ? renderForStaticMarkup
         : renderForString;
 
-      const finishRenderTimer = startSummaryTimer(
-        ssrMetrics.reactRendering,
-        { renderMethodName: getRenderMethodName(state) }
-      );
+      const finishRenderTimer = startSummaryTimer(ssrMetrics.reactRendering, { renderMethodName });
       /* eslint-disable react/jsx-props-no-spreading */
       const { renderedString, helmetInfo } = renderMethod(
         <Provider store={store}>

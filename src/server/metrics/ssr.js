@@ -26,4 +26,10 @@ createSummary({
   labelNames: ['renderMethodName'],
 });
 
+createSummary({
+  name: ssrNamespace('compose_modules', 'seconds'),
+  help: 'time taken to compose modules',
+  labelNames: ['renderMethodName'],
+});
+
 export default ssrNamespace.getMetricNames();
