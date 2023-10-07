@@ -25,7 +25,7 @@ function formatProtocol(parsedUrl) {
 }
 
 const logMethods = ['error', 'warn', 'log', 'info', 'debug'];
-logMethods.forEach((methodName) => { console[methodName] = logger[methodName].bind(logger); });
+// logMethods.forEach((methodName) => { console[methodName] = logger[methodName].bind(logger); });
 
 function outgoingRequestSpy(externalRequest) {
   startTimer(externalRequest);

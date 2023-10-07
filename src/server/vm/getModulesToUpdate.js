@@ -16,7 +16,7 @@
 
 import { areModuleEntriesEqual } from 'holocron/server';
 import { getModulesUsingExternals } from 'holocron';
-import { getServerStateConfig } from './stateConfig';
+// import { getServerStateConfig } from './stateConfig';
 
 export default function getModulesToUpdate(curr, next) {
   const { rootModuleName } = getServerStateConfig();

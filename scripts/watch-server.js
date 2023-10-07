@@ -20,8 +20,8 @@ const { spawn } = require('child_process');
 const buildServiceWorkerScripts = require('./build-service-workers');
 
 (async function dev() {
-  const { watcher } = await buildServiceWorkerScripts({ dev: true, watch: true, minify: false });
-  watcher.on('event', (event) => {
+  const { watcher: serviceWorkerWatcher } = await buildServiceWorkerScripts({ dev: true, watch: true, minify: false });
+  serviceWorkerWatcher.on('event', (event) => {
     switch (event.code) {
       case 'ERROR':
         console.error(event.error);
@@ -37,7 +37,12 @@ const buildServiceWorkerScripts = require('./build-service-workers');
     }
   });
 
-  const babelWatch = spawn('npm', ['run', 'build:server', '--', '--watch'], {
+  const babelWatch = spawn('npm', ['run', 'build:server:node', '--', '--watch'], {
+    stdio: 'inherit',
+    killSignal: 'SIGINT',
+  });
+
+  const esbuildWatch = spawn('npm', ['run', 'build:server:vm', '--', '--watch'], {
     stdio: 'inherit',
     killSignal: 'SIGINT',
   });
@@ -59,8 +64,9 @@ const buildServiceWorkerScripts = require('./build-service-workers');
   });
 
   process.on('exit', (code) => {
-    watcher.close();
+    serviceWorkerWatcher.close();
     babelWatch.kill(code);
+    esbuildWatch.kill(code);
     nodemon.kill(code);
   });
 }());
